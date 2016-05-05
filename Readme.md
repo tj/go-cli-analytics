@@ -48,6 +48,10 @@ default:
 }
 ```
 
+## Notes
+
+Note that there is no file-level locking at the moment for concurrent executions of your program. This may be added in the future if necessary.
+
 ## Badges
 
 [![GoDoc](https://godoc.org/github.com/tj/go-cli-analytics?status.svg)](https://godoc.org/github.com/tj/go-cli-analytics)
