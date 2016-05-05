@@ -187,6 +187,16 @@ func (a *Analytics) LastFlush() (time.Time, error) {
 	return info.ModTime(), nil
 }
 
+// LastFlushDuration returns the last flush time delta.
+func (a *Analytics) LastFlushDuration() (time.Duration, error) {
+	lastFlush, err := a.LastFlush()
+	if err != nil {
+		return 0, nil
+	}
+
+	return time.Now().Sub(lastFlush), nil
+}
+
 // Track event `name` with optional `props`.
 func (a *Analytics) Track(name string, props map[string]interface{}) error {
 	if a.events == nil {
