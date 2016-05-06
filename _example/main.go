@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/apex/log"
@@ -13,7 +12,8 @@ func main() {
 	log.SetHandler(text.Default)
 
 	// use DebugLevel to view logs
-	log.SetLevel(log.InfoLevel)
+	// log.SetLevel(log.InfoLevel)
+	log.SetLevel(log.DebugLevel)
 
 	a := analytics.New(&analytics.Config{
 		WriteKey: "7Oow2zHAd5HNnRs0DDT1KRMHSMjD9bf7",
@@ -27,21 +27,5 @@ func main() {
 		"whatever": "else here",
 	})
 
-	lastFlush, _ := a.LastFlush()
-	fmt.Printf("  last flush: %s\n", lastFlush)
-
-	n, _ := a.Size()
-	fmt.Printf("  events: %d\n", n)
-
-	switch {
-	case n >= 15:
-		fmt.Printf("  flush due to size\n")
-		a.Flush()
-	case time.Now().Sub(lastFlush) >= time.Minute:
-		fmt.Printf("  flush due to duration\n")
-		a.Flush()
-	default:
-		fmt.Printf("  close\n")
-		a.Close()
-	}
+	a.ConditionalFlush(15, time.Minute)
 }

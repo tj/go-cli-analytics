@@ -209,9 +209,9 @@ func (a *Analytics) Track(name string, props map[string]interface{}) error {
 	})
 }
 
-// ConditionalFlush flushes if event count is above `aboveCount`, or age is `aboveDuration`,
+// ConditionalFlush flushes if event count is above `aboveSize`, or age is `aboveDuration`,
 // otherwise Close() is called and the underlying file(s) are closed.
-func (a *Analytics) ConditionalFlush(aboveCount int, aboveDuration time.Duration) error {
+func (a *Analytics) ConditionalFlush(aboveSize int, aboveDuration time.Duration) error {
 	age, err := a.LastFlushDuration()
 	if err != nil {
 		return err
@@ -222,12 +222,21 @@ func (a *Analytics) ConditionalFlush(aboveCount int, aboveDuration time.Duration
 		return err
 	}
 
+	ctx := a.Log.WithFields(log.Fields{
+		"age":            age,
+		"size":           size,
+		"above_size":     aboveSize,
+		"above_duration": aboveDuration,
+	})
+
+	ctx.Debug("conditional flush")
+
 	switch {
-	case size >= aboveCount:
-		a.Log.WithField("size", size).Debug("flush size")
+	case size >= aboveSize:
+		ctx.Debug("flush size")
 		return a.Flush()
 	case age >= aboveDuration:
-		a.Log.WithField("age", age).Debug("flush age")
+		ctx.Debug("flush age")
 		return a.Flush()
 	default:
 		return a.Close()
