@@ -78,8 +78,8 @@ type Analytics struct {
 func (a *Analytics) init() {
 	a.initRoot()
 
-	disabled, err := a.Disabled()
-	if err != nil || disabled {
+	enabled, err := a.Enabled()
+	if err != nil || !enabled {
 		a.Log.Debug("disabled")
 		return
 	}
@@ -145,15 +145,15 @@ func (a *Analytics) initEvents() {
 	a.events = json.NewEncoder(f)
 }
 
-// Disabled returns true if the user decided to opt-out.
-func (a *Analytics) Disabled() (bool, error) {
+// Enabled returns true if the user hasn't opted out.
+func (a *Analytics) Enabled() (bool, error) {
 	_, err := os.Stat(filepath.Join(a.root, "disable"))
 
 	if os.IsNotExist(err) {
-		return false, nil
+		return true, nil
 	}
 
-	return true, err
+	return false, err
 }
 
 // Disable tracking. This method creates ~/<dir>/disable.
