@@ -69,6 +69,7 @@ type Analytics struct {
 // - ~/<dir>
 // - ~/<dir>/id
 // - ~/<dir>/events
+// - ~/<dir>/last_flush
 //
 func (a *Analytics) init() {
 	a.initRoot()
