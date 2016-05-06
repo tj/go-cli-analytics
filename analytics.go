@@ -6,6 +6,10 @@
 // to do this after a certain number of events (see Size()) have been buffered,
 // or after a given duration (see LastFlush()).
 //
+// You should prompt the user at some point, allowing them to opt-in, otherwise
+// invoke Disable() to flag for future invocations. Once disabled tracking is
+// automatically a no-op.
+//
 // Functions of this package are not thread-safe.
 package analytics
 
@@ -73,6 +77,13 @@ type Analytics struct {
 //
 func (a *Analytics) init() {
 	a.initRoot()
+
+	disabled, err := a.Disabled()
+	if err != nil || disabled {
+		a.Log.Debug("disabled")
+		return
+	}
+
 	a.initDir()
 	a.initID()
 	a.initEvents()
@@ -132,6 +143,30 @@ func (a *Analytics) initEvents() {
 	a.eventsFile = f
 
 	a.events = json.NewEncoder(f)
+}
+
+// Disabled returns true if the user decided to opt-out.
+func (a *Analytics) Disabled() (bool, error) {
+	_, err := os.Stat(filepath.Join(a.root, "disable"))
+
+	if os.IsNotExist(err) {
+		return false, nil
+	}
+
+	return true, err
+}
+
+// Disable tracking. This method creates ~/<dir>/disable.
+func (a *Analytics) Disable() error {
+	a.Log.Debug("disable")
+	_, err := os.Create(filepath.Join(a.root, "disable"))
+	return err
+}
+
+// Enable tracking. This method removes ~/<dir>/disable.
+func (a *Analytics) Enable() error {
+	a.Log.Debug("enable")
+	return os.Remove(filepath.Join(a.root, "disable"))
 }
 
 // Events reads the events from disk.
