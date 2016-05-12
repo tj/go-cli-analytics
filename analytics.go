@@ -290,8 +290,6 @@ func (a *Analytics) Flush() (err error) {
 		return err
 	}
 
-	a.Log.WithField("events", len(events)).Trace("flush").Stop(&err)
-
 	client := segment.New(a.WriteKey)
 
 	for _, event := range events {
