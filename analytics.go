@@ -24,6 +24,7 @@ import (
 	"github.com/apex/log"
 	"github.com/hashicorp/go-uuid"
 	"github.com/mitchellh/go-homedir"
+	"github.com/pkg/errors"
 	segment "github.com/segmentio/analytics-go"
 )
 
@@ -173,7 +174,7 @@ func (a *Analytics) Enable() error {
 func (a *Analytics) Events() (v []*Event, err error) {
 	f, err := os.Open(filepath.Join(a.root, "events"))
 	if err != nil {
-		return nil, err
+		return nil, errors.Wrap(err, "opening")
 	}
 
 	dec := json.NewDecoder(f)
@@ -187,7 +188,7 @@ func (a *Analytics) Events() (v []*Event, err error) {
 		}
 
 		if err != nil {
-			return nil, err
+			return nil, errors.Wrap(err, "decoding")
 		}
 
 		v = append(v, &e)
@@ -200,7 +201,7 @@ func (a *Analytics) Events() (v []*Event, err error) {
 func (a *Analytics) Size() (int, error) {
 	events, err := a.Events()
 	if err != nil {
-		return 0, err
+		return 0, errors.Wrap(err, "reading events")
 	}
 
 	return len(events), nil
@@ -280,14 +281,14 @@ func (a *Analytics) ConditionalFlush(aboveSize int, aboveDuration time.Duration)
 }
 
 // Flush the events to Segment, removing them from disk.
-func (a *Analytics) Flush() (err error) {
+func (a *Analytics) Flush() error {
 	if err := a.Close(); err != nil {
-		return err
+		return errors.Wrap(err, "closing")
 	}
 
 	events, err := a.Events()
 	if err != nil {
-		return err
+		return errors.Wrap(err, "reading events")
 	}
 
 	client := segment.New(a.WriteKey)
@@ -301,11 +302,11 @@ func (a *Analytics) Flush() (err error) {
 	}
 
 	if err := client.Close(); err != nil {
-		return err
+		return errors.Wrap(err, "closing client")
 	}
 
 	if err := a.Touch(); err != nil {
-		return err
+		return errors.Wrap(err, "touching")
 	}
 
 	return os.Remove(filepath.Join(a.root, "events"))
