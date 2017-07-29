@@ -209,7 +209,6 @@ func (a *Analytics) Size() (int, error) {
 
 // Touch ~/<dir>/last_flush.
 func (a *Analytics) Touch() error {
-	a.Log.Debug("touch")
 	path := filepath.Join(a.root, "last_flush")
 	return ioutil.WriteFile(path, []byte(":)"), 0755)
 }
@@ -314,6 +313,5 @@ func (a *Analytics) Flush() error {
 
 // Close the underlying file descriptor(s).
 func (a *Analytics) Close() error {
-	a.Log.Debug("close")
 	return a.eventsFile.Close()
 }
