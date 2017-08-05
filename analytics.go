@@ -265,8 +265,6 @@ func (a *Analytics) ConditionalFlush(aboveSize int, aboveDuration time.Duration)
 		"above_duration": aboveDuration,
 	})
 
-	ctx.Debug("conditional flush")
-
 	switch {
 	case size >= aboveSize:
 		ctx.Debug("flush size")
