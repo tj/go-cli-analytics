@@ -17,6 +17,7 @@ import (
 	"encoding/json"
 	"io"
 	"io/ioutil"
+	stdlog "log"
 	"os"
 	"path/filepath"
 	"time"
@@ -289,6 +290,7 @@ func (a *Analytics) Flush() error {
 	}
 
 	client := segment.New(a.WriteKey)
+	client.Logger = stdlog.New(ioutil.Discard, "", 0)
 
 	for _, event := range events {
 		client.Track(&segment.Track{
